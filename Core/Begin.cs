@@ -14,8 +14,7 @@ namespace QAChallenge.Core
         #region Abre navegador
         public void AbreNavegador()
         {
-            new DriverManager().SetUpDriver(new ChromeConfig());
-
+            var devMode = new ChromeOptions();
             var devMode = new ChromeOptions();
             devMode.AddArgument("disable-cache");
             devMode.AddArgument("start-maximized");
@@ -39,9 +38,8 @@ namespace QAChallenge.Core
             if(driverQuit) driver.Quit();
             else
             {
-                ProcessStartInfo psi = new() { FileName = "taskkill", Arguments = "/F /IM chromedriver.exe" };
-                using Process process = new() { StartInfo = psi };
-                process.Start(); process.WaitForExit();
+                if (driverQuit) driver.Quit();
+                else foreach (var process in Process.GetProcessesByName("chromedriver")) process.Kill(); 
             }
         }
         #endregion
@@ -50,8 +48,11 @@ namespace QAChallenge.Core
         [SetUp]
         public void Start()
         {
-            AbreNavegador();
-            driver.Navigate().GoToUrl("https://www.magazineluiza.com.br/");
+            try { 
+                AbreNavegador(); 
+                driver.Navigate().GoToUrl("https://www.magazineluiza.com.br/"); 
+            }catch { new DriverManager().SetUpDriver(new ChromeDriver()); }
+                
         }
         #endregion
 
